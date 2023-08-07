@@ -42,6 +42,12 @@ def execute_processing():
         # Ici, vous ajouteriez la logique de traitement des données
         st.success("Traitement exécuté avec succès")
 
+# Fonction pour afficher l'historique
+def show_history(username):
+    st.subheader("Historique des traitements pour {}".format(username))
+    # Ajoutez ici la logique pour afficher l'historique, par exemple :
+    st.write("Aucun traitement effectué jusqu'à présent.")
+
 # Fonction principale de l'application
 def main():
     username = authenticate_user()
@@ -54,8 +60,10 @@ def main():
             show_history(username)
         elif menu_selection == "Traitement":
             selected_dataset = select_dataset(username)
-            upload_file()
-            execute_processing()
+            if selected_dataset:
+                uploaded_file = upload_file()
+                if uploaded_file:
+                    execute_processing()
 
 # Exécution de l'application
 if __name__ == "__main__":

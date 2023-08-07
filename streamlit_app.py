@@ -1,73 +1,60 @@
 import streamlit as st
 
-# Simulation de données pour les groupes et jeux de données
-groupes = ['Admin', 'Direction Déchets', 'Délibérations', 'Collectivités']
-jeux_de_donnees = {
-    'Admin': ['Données A', 'Données B', 'Données C'],
-    'Direction Déchets': ['Déchets A', 'Déchets B', 'Déchets C'],
-    'Délibérations': ['Décision 1', 'Décision 2', 'Décision 3'],
-    'Collectivités': ['Ville A', 'Ville B', 'Ville C']
+# Liste des groupes d'utilisateurs avec leurs mots de passe
+user_credentials = {
+    "Admin": "admin123",
+    "Direction Déchets": "dechets456",
+    "Délibérations": "delibs789",
+    "Collectivités": "collect456"
 }
 
-# Page d'authentification
-def authentification():
-    st.title('Authentification')
-    username = st.text_input('Nom d\'utilisateur')
-    password = st.text_input('Mot de passe', type='password')
-    if st.button('Connexion'):
-        # Vérification des informations d'identification (à implémenter)
-        if username == 'admin' and password == 'admin':
-            afficher_tableau_de_bord_admin()
-        elif username == 'dechets' and password == 'dechets':
-            afficher_tableau_de_bord_dechets()
-        # ... autres groupes ...
-
-# Tableau de bord Admin
-def afficher_tableau_de_bord_admin():
-    st.title('Tableau de Bord - Admin')
-    st.sidebar.title('Options')
+# Fonction pour l'authentification
+def authenticate_user():
+    st.title("Application de Mise à Jour des Jeux de Données")
     
-    # Section de gestion des mises à jour
-    st.header('Gestion des Mises à Jour')
-    groupe = 'Admin'
+    username = st.text_input("Nom d'utilisateur")
+    password = st.text_input("Mot de passe", type="password")
+
+    if st.button("Se connecter"):
+        if username in user_credentials and password == user_credentials[username]:
+            st.success("Connexion réussie en tant que {}".format(username))
+            return True
+        else:
+            st.error("Nom d'utilisateur ou mot de passe incorrect")
     
-    if groupe in jeux_de_donnees:
-        jeu_de_donnees_selectionne = st.selectbox('Sélectionner un jeu de données', jeux_de_donnees[groupe])
-        if st.button('Mettre à jour'):
-            # Appeler l'API opendatasoft explore pour mettre à jour le jeu de données sélectionné
-            # Ajouter des fonctionnalités supplémentaires ici
+    return False
 
-    # Section d'historique
-    if st.button('Historique'):
-        afficher_historique()
+# Fonction pour la sélection du jeu de données
+def select_dataset():
+    st.subheader("Sélectionnez le jeu de données à mettre à jour :")
+    selected_dataset = st.selectbox("Jeu de données", ["Jeu de données 1", "Jeu de données 2", "Jeu de données 3"])
+    return selected_dataset
 
-# Tableau de bord Direction Déchets
-def afficher_tableau_de_bord_dechets():
-    st.title('Tableau de Bord - Direction Déchets')
-    st.sidebar.title('Options')
-    
-    # Section de gestion des mises à jour
-    st.header('Gestion des Mises à Jour')
-    groupe = 'Direction Déchets'
-    
-    if groupe in jeux_de_donnees:
-        jeu_de_donnees_selectionne = st.selectbox('Sélectionner un jeu de données', jeux_de_donnees[groupe])
-        if st.button('Mettre à jour'):
-            # Appeler l'API opendatasoft explore pour mettre à jour le jeu de données sélectionné
-            # Ajouter des fonctionnalités supplémentaires ici
+# Fonction pour charger le fichier de mise à jour
+def upload_file():
+    uploaded_file = st.file_uploader("Charger le fichier de mise à jour", type=["csv", "xlsx"])
+    return uploaded_file
 
-    # Section d'historique
-    if st.button('Historique'):
-        afficher_historique()
+# Fonction pour exécuter le traitement
+def execute_processing():
+    if st.button("Exécuter le traitement"):
+        # Ici, vous ajouteriez la logique de traitement des données
+        st.success("Traitement exécuté avec succès")
 
-# Affichage de l'historique
-def afficher_historique():
-    st.title('Historique des Traitements')
-    # Ajouter ici la visualisation de l'historique
+# Fonction pour afficher l'historique
+def show_history():
+    if st.button("Historique"):
+        # Ici, vous afficheriez l'historique des traitements
+        st.info("Historique des traitements affiché")
 
-# Page principale
+# Fonction principale de l'application
 def main():
-    authentification()
+    if authenticate_user():
+        selected_dataset = select_dataset()
+        upload_file()
+        execute_processing()
+        show_history()
 
-if __name__ == '__main__':
+# Exécution de l'application
+if __name__ == "__main__":
     main()

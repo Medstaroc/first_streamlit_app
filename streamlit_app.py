@@ -1,11 +1,11 @@
 import streamlit as st
 
-# Liste des groupes d'utilisateurs avec leurs mots de passe
+# Liste des groupes d'utilisateurs avec leurs mots de passe et leurs jeux de données respectifs
 user_credentials = {
-    "Admin": "admin123",
-    "Direction Déchets": "dechets456",
-    "Délibérations": "delibs789",
-    "Collectivités": "collect456"
+    "Admin": {"password": "admin123", "datasets": ["Prénoms des enfants nés à Nantes", "Lieux Pratiques Numériques", "Stations Marguerite de Nantes Métropole - Tarifs", "Parcs relais de Nantes Métropole - Statistiques d'occupation", "Déchèteries-écopoints de Nantes Métropole - Tonnages", "Déchèteries-écopoints de Nantes Métropole - Fréquentations"]},
+    "Collectivité": {"password": "collect123", "datasets": ["Prénoms des enfants nés à Nantes", "Lieux Pratiques Numériques"]},
+    "Déplacement": {"password": "deplacement123", "datasets": ["Stations Marguerite de Nantes Métropole - Tarifs", "Parcs relais de Nantes Métropole - Statistiques d'occupation"]},
+    "Direction Déchêts": {"password": "dechets123", "datasets": ["Déchèteries-écopoints de Nantes Métropole - Tonnages", "Déchèteries-écopoints de Nantes Métropole - Fréquentations"]}
 }
 
 # Fonction pour l'authentification
@@ -16,7 +16,7 @@ def authenticate_user():
     password = st.text_input("Mot de passe", type="password")
 
     if st.button("Se connecter"):
-        if username in user_credentials and password == user_credentials[username]:
+        if username in user_credentials and password == user_credentials[username]["password"]:
             st.success("Connexion réussie en tant que {}".format(username))
             return username
         else:
@@ -25,9 +25,10 @@ def authenticate_user():
     return None
 
 # Fonction pour la sélection du jeu de données
-def select_dataset():
+def select_dataset(username):
     st.subheader("Sélectionnez le jeu de données à mettre à jour :")
-    selected_dataset = st.selectbox("Jeu de données", ["Jeu de données 1", "Jeu de données 2", "Jeu de données 3"])
+    datasets = user_credentials[username]["datasets"]
+    selected_dataset = st.selectbox("Jeu de données", datasets)
     return selected_dataset
 
 # Fonction pour charger le fichier de mise à jour
@@ -41,11 +42,6 @@ def execute_processing():
         # Ici, vous ajouteriez la logique de traitement des données
         st.success("Traitement exécuté avec succès")
 
-# Fonction pour afficher l'historique
-def show_history(username):
-    # Ici, vous afficheriez l'historique des traitements pour l'utilisateur spécifié
-    st.info("Historique des traitements pour {} affiché".format(username))
-
 # Fonction principale de l'application
 def main():
     username = authenticate_user()
@@ -57,7 +53,7 @@ def main():
         if menu_selection == "Accueil":
             show_history(username)
         elif menu_selection == "Traitement":
-            selected_dataset = select_dataset()
+            selected_dataset = select_dataset(username)
             upload_file()
             execute_processing()
 

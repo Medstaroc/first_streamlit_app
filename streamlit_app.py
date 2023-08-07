@@ -53,5 +53,16 @@ def afficher_historique():
 def main():
     authentification()
 
+# Section de gestion des mises à jour
+st.header('Gestion des Mises à Jour')
+groupe = st.session_state.groupe  # Récupérer le groupe de l'utilisateur connecté
+
+if groupe:
+    jeu_de_donnees_selectionne = st.selectbox('Sélectionner un jeu de données', jeux_de_donnees[groupe])
+    if st.button('Mettre à jour'):
+        # Appeler l'API opendatasoft explore pour mettre à jour le jeu de données sélectionné
+        # Ajouter des fonctionnalités supplémentaires ici
+
+
 if __name__ == '__main__':
     main()

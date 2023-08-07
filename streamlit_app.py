@@ -1,5 +1,4 @@
 import streamlit as st
-
 # Simulation de données pour les groupes et jeux de données
 groupes = ['Admin', 'Direction Déchets', 'Délibérations', 'Collectivités']
 jeux_de_donnees = {

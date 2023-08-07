@@ -63,7 +63,7 @@ def main():
             if selected_dataset:
                 uploaded_file = upload_file()
                 if uploaded_file:
-                    execute_processing()  # Ajout de cette ligne
+                    execute_processing()
 
 # Exécution de l'application
 if __name__ == "__main__":

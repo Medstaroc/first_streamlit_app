@@ -46,7 +46,8 @@ def afficher_tableau_de_bord_admin():
             # Ajouter des fonctionnalités supplémentaires ici
 
     # Section d'historique
-    st.sidebar.button('Historique', afficher_historique)
+    st.sidebar.button('Historique')
+    st.sidebar.button('Retour au Tableau de Bord', afficher_tableau_de_bord_admin)
 
 # Tableau de bord Direction Déchets
 def afficher_tableau_de_bord_dechets():
@@ -64,7 +65,8 @@ def afficher_tableau_de_bord_dechets():
             # Ajouter des fonctionnalités supplémentaires ici
 
     # Section d'historique
-    st.sidebar.button('Historique', afficher_historique)
+    st.sidebar.button('Historique')
+    st.sidebar.button('Retour au Tableau de Bord', afficher_tableau_de_bord_dechets)
 
 # Affichage de l'historique
 def afficher_historique():

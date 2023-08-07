@@ -48,11 +48,6 @@ def afficher_tableau_de_bord_dechets():
 def afficher_historique():
     st.title('Historique des Traitements')
     st.dataframe(historique)
-
-# Page principale
-def main():
-    authentification()
-
 # Section de gestion des mises à jour
 st.header('Gestion des Mises à Jour')
 groupe = st.session_state.groupe  # Récupérer le groupe de l'utilisateur connecté
@@ -62,6 +57,10 @@ if groupe:
     if st.button('Mettre à jour'):
         # Appeler l'API opendatasoft explore pour mettre à jour le jeu de données sélectionné
         # Ajouter des fonctionnalités supplémentaires ici
+# Page principale
+def main():
+    authentification()
+
 
 
 if __name__ == '__main__':

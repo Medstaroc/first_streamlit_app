@@ -1,7 +1,6 @@
 import streamlit as st
-import pandas as pd
 
-# Simulation de données pour les groupes, jeux de données et l'historique des traitements
+# Simulation de données pour les groupes et jeux de données
 groupes = ['Admin', 'Direction Déchets', 'Délibérations', 'Collectivités']
 jeux_de_donnees = {
     'Admin': ['Données A', 'Données B', 'Données C'],
@@ -9,13 +8,6 @@ jeux_de_donnees = {
     'Délibérations': ['Décision 1', 'Décision 2', 'Décision 3'],
     'Collectivités': ['Ville A', 'Ville B', 'Ville C']
 }
-historique = pd.DataFrame({
-    'Date': ['2023-08-01 10:00', '2023-08-02 15:30'],
-    'Utilisateur': ['admin_user', 'dechets_user'],
-    'Groupe': ['Admin', 'Direction Déchets'],
-    'Jeu de Données': ['Données A', 'Données B'],
-    'Statut': ['Succès', 'Erreur']
-})
 
 # Page d'authentification
 def authentification():
@@ -46,8 +38,8 @@ def afficher_tableau_de_bord_admin():
             # Ajouter des fonctionnalités supplémentaires ici
 
     # Section d'historique
-    st.sidebar.button('Historique')
-    st.sidebar.button('Retour au Tableau de Bord', afficher_tableau_de_bord_admin)
+    if st.button('Historique'):
+        afficher_historique()
 
 # Tableau de bord Direction Déchets
 def afficher_tableau_de_bord_dechets():
@@ -65,13 +57,13 @@ def afficher_tableau_de_bord_dechets():
             # Ajouter des fonctionnalités supplémentaires ici
 
     # Section d'historique
-    st.sidebar.button('Historique')
-    st.sidebar.button('Retour au Tableau de Bord', afficher_tableau_de_bord_dechets)
+    if st.button('Historique'):
+        afficher_historique()
 
 # Affichage de l'historique
 def afficher_historique():
     st.title('Historique des Traitements')
-    st.dataframe(historique)
+    # Ajouter ici la visualisation de l'historique
 
 # Page principale
 def main():

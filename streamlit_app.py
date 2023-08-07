@@ -18,11 +18,11 @@ def authenticate_user():
     if st.button("Se connecter"):
         if username in user_credentials and password == user_credentials[username]:
             st.success("Connexion réussie en tant que {}".format(username))
-            return True
+            return username
         else:
             st.error("Nom d'utilisateur ou mot de passe incorrect")
     
-    return False
+    return None
 
 # Fonction pour la sélection du jeu de données
 def select_dataset():
@@ -42,19 +42,21 @@ def execute_processing():
         st.success("Traitement exécuté avec succès")
 
 # Fonction pour afficher l'historique
-def show_history():
-    # Ici, vous afficheriez l'historique des traitements
-    st.info("Historique des traitements affiché")
+def show_history(username):
+    # Ici, vous afficheriez l'historique des traitements pour l'utilisateur spécifié
+    st.info("Historique des traitements pour {} affiché".format(username))
 
 # Fonction principale de l'application
 def main():
-    st.sidebar.title("Menu")
-    menu_selection = st.sidebar.radio("Choisissez une option", ["Accueil", "Traitement"])
-    
-    if menu_selection == "Accueil":
-        show_history()
-    elif menu_selection == "Traitement":
-        if authenticate_user():
+    username = authenticate_user()
+
+    if username is not None:
+        st.sidebar.title("Menu")
+        menu_selection = st.sidebar.radio("Choisissez une option", ["Accueil", "Traitement"])
+
+        if menu_selection == "Accueil":
+            show_history(username)
+        elif menu_selection == "Traitement":
             selected_dataset = select_dataset()
             upload_file()
             execute_processing()

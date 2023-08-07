@@ -37,10 +37,10 @@ def upload_file():
     return uploaded_file
 
 # Fonction pour exécuter le traitement
-def execute_processing():
+def execute_processing(selected_dataset):
     if st.button("Exécuter le traitement"):
-        # Ici, vous ajouteriez la logique de traitement des données
-        st.success("Traitement exécuté avec succès")
+        # Ici, vous ajouteriez la logique de traitement des données pour le jeu sélectionné
+        st.success("Traitement exécuté avec succès pour {}".format(selected_dataset))
 
 # Fonction pour afficher l'historique
 def show_history(username):
@@ -49,26 +49,24 @@ def show_history(username):
     st.write("Aucun traitement effectué jusqu'à présent.")
 
 # Fonction principale de l'application
-# Fonction principale de l'application
 def main():
     username = authenticate_user()
 
-    if username:
+    if username is not None:
         st.sidebar.title("Menu")
         menu_selection = st.sidebar.radio("Choisissez une option", ["Accueil", "Traitement"])
 
         if menu_selection == "Accueil":
             show_history(username)
         elif menu_selection == "Traitement":
-            if username == "Admin":
-                selected_dataset = select_dataset(username)
-                if selected_dataset:
+            selected_dataset = select_dataset(username)
+            if selected_dataset:
+                if username == "Admin":
                     uploaded_file = upload_file()
                     if uploaded_file:
-                        execute_processing()
-            else:
-                st.warning("Vous n'avez pas la permission d'accéder à cette fonctionnalité.")
-
+                        execute_processing(selected_dataset)
+                else:
+                    st.warning("Vous n'avez pas la permission d'accéder à cette fonctionnalité.")
 
 # Exécution de l'application
 if __name__ == "__main__":

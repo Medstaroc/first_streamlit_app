@@ -43,17 +43,21 @@ def execute_processing():
 
 # Fonction pour afficher l'historique
 def show_history():
-    if st.button("Historique"):
-        # Ici, vous afficheriez l'historique des traitements
-        st.info("Historique des traitements affiché")
+    # Ici, vous afficheriez l'historique des traitements
+    st.info("Historique des traitements affiché")
 
 # Fonction principale de l'application
 def main():
-    if authenticate_user():
-        selected_dataset = select_dataset()
-        upload_file()
-        execute_processing()
+    st.sidebar.title("Menu")
+    menu_selection = st.sidebar.radio("Choisissez une option", ["Accueil", "Traitement"])
+    
+    if menu_selection == "Accueil":
         show_history()
+    elif menu_selection == "Traitement":
+        if authenticate_user():
+            selected_dataset = select_dataset()
+            upload_file()
+            execute_processing()
 
 # Exécution de l'application
 if __name__ == "__main__":

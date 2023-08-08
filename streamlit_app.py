@@ -1,73 +1,98 @@
+import os
+import requests
 import streamlit as st
 
-# Liste des groupes d'utilisateurs avec leurs mots de passe et leurs jeux de données respectifs
-user_credentials = {
-    "Admin": {"password": "admin123", "datasets": ["Prénoms des enfants nés à Nantes", "Lieux Pratiques Numériques", "Stations Marguerite de Nantes Métropole - Tarifs", "Parcs relais de Nantes Métropole - Statistiques d'occupation", "Déchèteries-écopoints de Nantes Métropole - Tonnages", "Déchèteries-écopoints de Nantes Métropole - Fréquentations"]},
-    "Collectivité": {"password": "collect123", "datasets": ["Prénoms des enfants nés à Nantes", "Lieux Pratiques Numériques"]},
-    "Déplacement": {"password": "deplacement123", "datasets": ["Stations Marguerite de Nantes Métropole - Tarifs", "Parcs relais de Nantes Métropole - Statistiques d'occupation"]},
-    "Direction Déchêts": {"password": "dechets123", "datasets": ["Déchèteries-écopoints de Nantes Métropole - Tonnages", "Déchèteries-écopoints de Nantes Métropole - Fréquentations"]}
-}
-
-# Fonction pour l'authentification
-def authenticate_user():
-    st.title("Application de Mise à Jour des Jeux de Données")
-    
+# Page d'authentification
+def login():
+    st.title("Authentification")
     username = st.text_input("Nom d'utilisateur")
     password = st.text_input("Mot de passe", type="password")
-
-    if st.button("Se connecter"):
-        if username in user_credentials and password == user_credentials[username]["password"]:
-            st.success("Connexion réussie en tant que {}".format(username))
-            return username
-        else:
-            st.error("Nom d'utilisateur ou mot de passe incorrect")
+    submit_button = st.button("Se connecter")
     
-    return None
+    if submit_button:
+        # Effectuer l'authentification ici (par exemple, en comparant avec des informations enregistrées ou en utilisant des variables d'environnement)
+        # Si l'authentification est réussie, définir une variable de session pour indiquer que l'utilisateur est connecté
+        is_authenticated = True  # Exemple, mettez votre propre logique d'authentification ici
+        if is_authenticated:
+            st.session_state.authenticated = True
+            st.success("Authentification réussie. Vous pouvez maintenant mettre à jour les jeux de données.")
+        else:
+            st.error("Nom d'utilisateur ou mot de passe incorrect.")
 
-# Fonction pour la sélection du jeu de données
-def select_dataset(username):
-    st.subheader("Sélectionnez le jeu de données à mettre à jour :")
-    datasets = user_credentials[username]["datasets"]
-    selected_dataset = st.selectbox("Jeu de données", datasets)
-    return selected_dataset
+# Fonction pour mettre à jour les jeux de données
+def update_dataset(username, password, selected_dataset, uploaded_file):
+    # Code pour mettre à jour les jeux de données sur le portail de Nantes Métropole
+    dataset_id = selected_dataset
+    dataset_uid = get_dataset_uid(dataset_id, username, password)
+    
+    upload_url = "https://data.nantesmetropole.fr/api/management/v2/files"
+    uploaded_file_name = uploaded_file.name
+    
+    with open(uploaded_file_name, 'rb') as file:
+        files = {'file': (uploaded_file_name, file)}
+        response = requests.post(upload_url, files=files, auth=(username, password))
+    data = response.json()
+    url_res = data['url']
+    
+    url = f'https://data.nantesmetropole.fr/api/management/v2/datasets/{dataset_uid}/resources/'
+    response = requests.get(url, auth=(username, password))
+    data = response.json()
+    resource_uid = data[0]["resource_uid"]
+    
+    url = f'https://data.nantesmetropole.fr/api/management/v2/datasets/{dataset_uid}/resources/{resource_uid}'
+    payload = {
+        "url": url_res,
+        "title": "07082023_lieux_pratiques_numeriques",
+        "type": "csvfile",
+        "params": {
+            "headers_first_row": True,
+            "separator": ',',
+            "encoding": "UTF8",
+            "extract_filename": False,
+            "first_row_no": 1,
+            "escapechar": '\\',
+            "doublequote": True
+        }
+    }
+    response = requests.put(url, json=payload, auth=(username, password))
+    
+    url = f'https://data.nantesmetropole.fr/api/management/v2/datasets/{dataset_uid}/publish/'
+    response = requests.put(url, auth=(username, password))
+    
+    return response
 
-# Fonction pour charger le fichier de mise à jour
-def upload_file():
-    uploaded_file = st.file_uploader("Charger le fichier de mise à jour", type=["csv", "xlsx"])
-    return uploaded_file
-
-# Fonction pour exécuter le traitement
-def execute_processing(selected_dataset):
-    if st.button("Exécuter le traitement"):
-        # Ici, vous ajouteriez la logique de traitement des données pour le jeu sélectionné
-        st.success("Traitement exécuté avec succès pour {}".format(selected_dataset))
-
-# Fonction pour afficher l'historique
-def show_history(username):
-    st.subheader("Historique des traitements pour {}".format(username))
-    # Ajoutez ici la logique pour afficher l'historique, par exemple :
-    st.write("Aucun traitement effectué jusqu'à présent.")
-
-# Fonction principale de l'application
+# Page principale
 def main():
-    username = authenticate_user()
+    st.title("Mise à jour des Jeux de Données")
 
-    if username is not None:
-        st.sidebar.title("Menu")
-        menu_selection = st.sidebar.radio("Choisissez une option", ["Accueil", "Traitement"])
+    # Vérifier si l'utilisateur est authentifié
+    if "authenticated" not in st.session_state:
+        st.session_state.authenticated = False
 
-        if menu_selection == "Accueil":
-            show_history(username)
-        elif menu_selection == "Traitement":
-            selected_dataset = select_dataset(username)
-            if selected_dataset:
-                if username == "Admin":
-                    uploaded_file = upload_file()
-                    if uploaded_file:
-                        execute_processing(selected_dataset)
+    if not st.session_state.authenticated:
+        login()
+    else:
+        st.write("Merci de sélectionner le JDD à mettre à jour :")
+        dataset_options = [
+            "244400404_lieux-pratiques-numeriques-nantes",
+            "244400404_piscines-nantes-metropole-horaires",
+            "244400404_nombre-annuel-naissances-nantes",
+            "244400404_nombre-annuel-mariages-nantes",
+            "244400404_nombre-annuel-deces-nantes"
+        ]
+        selected_dataset = st.selectbox("Sélectionner un jeu de données", dataset_options)
+
+        if selected_dataset:
+            st.write(f"Jeu de données sélectionné : {selected_dataset}")
+            uploaded_file = st.file_uploader("Charger le fichier à jour", type=["csv"])
+
+            if uploaded_file:
+                update_response = update_dataset(username, password, selected_dataset, uploaded_file)
+                
+                if update_response.status_code == 200:
+                    st.success("Mise à jour réussie !")
                 else:
-                    st.warning("Vous n'avez pas la permission d'accéder à cette fonctionnalité.")
+                    st.error("Une erreur est survenue lors de la mise à jour.")
 
-# Exécution de l'application
 if __name__ == "__main__":
     main()

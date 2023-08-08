@@ -10,10 +10,8 @@ def login():
     submit_button = st.button("Se connecter")
     
     if submit_button:
-        # Effectuer l'authentification ici (par exemple, en comparant avec des informations enregistrées ou en utilisant des variables d'environnement)
-        # Si l'authentification est réussie, définir une variable de session pour indiquer que l'utilisateur est connecté
-        is_authenticated = True  # Exemple, mettez votre propre logique d'authentification ici
-        if is_authenticated:
+        # Vérifier les informations d'identification
+        if username == "mohamed.darari@nantesmetropole.fr" and password == "b8RmmgY5":
             st.session_state.authenticated = True
             st.success("Authentification réussie. Vous pouvez maintenant mettre à jour les jeux de données.")
         else:

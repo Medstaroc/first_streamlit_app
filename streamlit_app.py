@@ -28,7 +28,7 @@ def get_dataset_uid(dataset_id, utilisateur, mot_de_passe):
 def update_dataset(selected_dataset, uploaded_file):
     # Code pour mettre à jour les jeux de données sur le portail de Nantes Métropole
     dataset_id = selected_dataset
-    dataset_uid = get_dataset_uid(dataset_id, st.session_state.utilisateur, st.session_state.mot_de_passe)
+    dataset_uid = st.session_state.functions["get_dataset_uid"](dataset_id, st.session_state.utilisateur, st.session_state.mot_de_passe)
     
     upload_url = "https://data.nantesmetropole.fr/api/management/v2/files"
     uploaded_file_name = uploaded_file.name
@@ -92,7 +92,7 @@ def main():
             uploaded_file = st.file_uploader("Charger le fichier à jour", type=["csv"])
 
             if uploaded_file:
-                update_response = update_dataset(selected_dataset, uploaded_file)
+                update_response = st.session_state.functions["update_dataset"](selected_dataset, uploaded_file)
                 
                 if update_response.status_code == 200:
                     st.success("Mise à jour réussie !")

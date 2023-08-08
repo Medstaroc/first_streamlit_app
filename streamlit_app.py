@@ -17,6 +17,13 @@ def login():
         else:
             st.error("Nom d'utilisateur ou mot de passe incorrect.")
 
+# Fonction pour récupérer l'UID du jeu de données
+def get_dataset_uid(dataset_id, utilisateur, mot_de_passe):
+    response = requests.get(f'https://data.nantesmetropole.fr/api/v2/catalog/datasets?where=dataset_id%20%3D%20%22{dataset_id}%22', auth=(utilisateur, mot_de_passe))
+    data = response.json()
+    dataset_uid = data['datasets'][0]['dataset']['dataset_uid']
+    return dataset_uid
+
 # Fonction pour mettre à jour les jeux de données
 def update_dataset(selected_dataset, uploaded_file):
     # Code pour mettre à jour les jeux de données sur le portail de Nantes Métropole

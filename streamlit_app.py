@@ -38,7 +38,7 @@ def update_dataset(selected_dataset, df):
     upload_url = "https://data.nantesmetropole.fr/api/management/v2/files"
 
     with open(temp_file_path, 'rb') as file:
-        files = {'file': (temp_file_path, file)}
+        files = {'file': (temp_file_path, file.read())}
         response = requests.post(upload_url, files=files, auth=("mohamed.darari@nantesmetropole.fr", "b8RmmgY5"))
     data = response.json()
     url_res = data['url']
@@ -111,4 +111,7 @@ def main():
                     if update_response.status_code == 200:
                         st.success("Mise à jour réussie !")
                     else:
-                        st.error("
+                        st.error("Une erreur est survenue lors de la mise à jour.")
+
+if __name__ == "__main__":
+    main()

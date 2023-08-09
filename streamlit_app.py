@@ -2,6 +2,7 @@ import os
 import requests
 import streamlit as st
 import pandas as pd
+from streamlit_extras.dataframe_explorer import dataframe_explorer
 
 # Page d'authentification
 def login():
@@ -20,7 +21,7 @@ def login():
 
 # Fonction pour récupérer l'UID du jeu de données
 def get_dataset_uid(dataset_id):
-    response = requests.get(f'https://data.nantesmetropole.fr/api/v2/catalog/datasets?where=dataset_id%20%3D%20%22{dataset_id}%22', auth=("mohamed.darari@nantesmetropole.fr", "b8RmmgY5"))
+    response = requests.get(f'https://data.nantesmetropole.fr/api/v2/catalog/datasets?where=dataset_id%20%3D%20%22{dataset_id}%22', auth=(utilisateur, mot_de_passe))
     data = response.json()
     dataset_uid = data['datasets'][0]['dataset']['dataset_uid']
     return dataset_uid
@@ -39,12 +40,12 @@ def update_dataset(selected_dataset, df):
 
     with open(temp_file_path, 'rb') as file:
         files = {'file': (temp_file_path, file.read())}
-        response = requests.post(upload_url, files=files, auth=("mohamed.darari@nantesmetropole.fr", "b8RmmgY5"))
+        response = requests.post(upload_url, files=files, auth=(utilisateur, mot_de_passe))
     data = response.json()
     url_res = data['url']
     
     url = f'https://data.nantesmetropole.fr/api/management/v2/datasets/{dataset_uid}/resources/'
-    response = requests.get(url, auth=("mohamed.darari@nantesmetropole.fr", "b8RmmgY5"))
+    response = requests.get(url, auth=(utilisateur, mot_de_passe))
     data = response.json()
     resource_uid = data[0]["resource_uid"]
     
@@ -63,10 +64,10 @@ def update_dataset(selected_dataset, df):
             "doublequote": True
         }
     }
-    response = requests.put(url, json=payload, auth=("mohamed.darari@nantesmetropole.fr", "b8RmmgY5"))
+    response = requests.put(url, json=payload, auth=(utilisateur, mot_de_passe))
     
     url = f'https://data.nantesmetropole.fr/api/management/v2/datasets/{dataset_uid}/publish/'
-    response = requests.put(url, auth=("mohamed.darari@nantesmetropole.fr", "b8RmmgY5"))
+    response = requests.put(url, auth=(utilisateur, mot_de_passe))
     
     # Suppression du fichier temporaire
     os.remove(temp_file_path)
@@ -101,7 +102,8 @@ def main():
             if uploaded_file:
                 st.write("Aperçu du fichier chargé :")
                 df = pd.read_csv(uploaded_file)
-                st.dataframe(df)
+                filtred_df = dataframe_explorer(df)
+                st.dataframe(filtred_df, use_container_width =True)
 
                 update_button = st.button("Mettre à jour le jeu de données")
 

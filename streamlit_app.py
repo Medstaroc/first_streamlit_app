@@ -1,46 +1,50 @@
 import os
 import requests
 import streamlit as st
+import pandas as pd
 
 # Page d'authentification
 def login():
     st.title("Authentification")
-    st.session_state.utilisateur = st.text_input("Nom d'utilisateur")
-    st.session_state.mot_de_passe = st.text_input("Mot de passe", type="password")
+    utilisateur = st.text_input("Nom d'utilisateur")
+    mot_de_passe = st.text_input("Mot de passe", type="password")
     submit_button = st.button("Se connecter")
     
     if submit_button:
         # Vérifier les informations d'identification
-        if st.session_state.utilisateur == "mohamed.darari@nantesmetropole.fr" and st.session_state.mot_de_passe == "b8RmmgY5":
+        if utilisateur == "mohamed.darari@nantesmetropole.fr" and mot_de_passe == "b8RmmgY5":
             st.session_state.authenticated = True
             st.success("Authentification réussie. Vous pouvez maintenant mettre à jour les jeux de données.")
         else:
             st.error("Nom d'utilisateur ou mot de passe incorrect.")
 
 # Fonction pour récupérer l'UID du jeu de données
-def get_dataset_uid(dataset_id, utilisateur, mot_de_passe):
-    response = requests.get(f'https://data.nantesmetropole.fr/api/v2/catalog/datasets?where=dataset_id%20%3D%20%22{dataset_id}%22', auth=(utilisateur, mot_de_passe))
+def get_dataset_uid(dataset_id):
+    response = requests.get(f'https://data.nantesmetropole.fr/api/v2/catalog/datasets?where=dataset_id%20%3D%20%22{dataset_id}%22', auth=("mohamed.darari@nantesmetropole.fr", "b8RmmgY5"))
     data = response.json()
     dataset_uid = data['datasets'][0]['dataset']['dataset_uid']
     return dataset_uid
 
 # Fonction pour mettre à jour les jeux de données
-def update_dataset(selected_dataset, uploaded_file):
+def update_dataset(selected_dataset, df):
     # Code pour mettre à jour les jeux de données sur le portail de Nantes Métropole
     dataset_id = selected_dataset
-    dataset_uid = get_dataset_uid(dataset_id, st.session_state.utilisateur, st.session_state.mot_de_passe)
+    dataset_uid = get_dataset_uid(dataset_id)
+    
+    # Chargement du DataFrame dans un fichier CSV temporaire
+    temp_file_path = "temp_update_file.csv"
+    df.to_csv(temp_file_path, index=False)
     
     upload_url = "https://data.nantesmetropole.fr/api/management/v2/files"
-    uploaded_file_name = uploaded_file.name
-    
-    with open(uploaded_file_name, 'rb') as file:
-        files = {'file': (uploaded_file_name, file)}
-        response = requests.post(upload_url, files=files, auth=(st.session_state.utilisateur, st.session_state.mot_de_passe))
+
+    with open(temp_file_path, 'rb') as file:
+        files = {'file': (temp_file_path, file)}
+        response = requests.post(upload_url, files=files, auth=("mohamed.darari@nantesmetropole.fr", "b8RmmgY5"))
     data = response.json()
     url_res = data['url']
     
     url = f'https://data.nantesmetropole.fr/api/management/v2/datasets/{dataset_uid}/resources/'
-    response = requests.get(url, auth=(st.session_state.utilisateur, st.session_state.mot_de_passe))
+    response = requests.get(url, auth=("mohamed.darari@nantesmetropole.fr", "b8RmmgY5"))
     data = response.json()
     resource_uid = data[0]["resource_uid"]
     
@@ -59,10 +63,13 @@ def update_dataset(selected_dataset, uploaded_file):
             "doublequote": True
         }
     }
-    response = requests.put(url, json=payload, auth=(st.session_state.utilisateur, st.session_state.mot_de_passe))
+    response = requests.put(url, json=payload, auth=("mohamed.darari@nantesmetropole.fr", "b8RmmgY5"))
     
     url = f'https://data.nantesmetropole.fr/api/management/v2/datasets/{dataset_uid}/publish/'
-    response = requests.put(url, auth=(st.session_state.utilisateur, st.session_state.mot_de_passe))
+    response = requests.put(url, auth=("mohamed.darari@nantesmetropole.fr", "b8RmmgY5"))
+    
+    # Suppression du fichier temporaire
+    os.remove(temp_file_path)
     
     return response
 
@@ -92,12 +99,16 @@ def main():
             uploaded_file = st.file_uploader("Charger le fichier à jour", type=["csv"])
 
             if uploaded_file:
-                update_response = update_dataset(selected_dataset, uploaded_file)
-                
-                if update_response.status_code == 200:
-                    st.success("Mise à jour réussie !")
-                else:
-                    st.error("Une erreur est survenue lors de la mise à jour.")
+                st.write("Aperçu du fichier chargé :")
+                df = pd.read_csv(uploaded_file)
+                st.dataframe(df)
 
-if __name__ == "__main__":
-    main()
+                update_button = st.button("Mettre à jour le jeu de données")
+
+                if update_button:
+                    update_response = update_dataset(selected_dataset, df)
+
+                    if update_response.status_code == 200:
+                        st.success("Mise à jour réussie !")
+                    else:
+                        st.error("

@@ -12,7 +12,7 @@ def login():
     
     if submit_button:
         # Vérifier les informations d'identification
-        if utilisateur == st.secrets["username"] and mot_de_passe == st.secrets["password"]:
+        if utilisateur == st.secrets.NM_credentials["username"] and mot_de_passe == st.secrets.NM_credentials["password"]:
             st.session_state.authenticated = True
             st.success("Authentification réussie. Vous pouvez maintenant mettre à jour les jeux de données.")
         else:
